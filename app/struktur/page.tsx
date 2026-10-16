@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SiteFooter, SiteHeader } from "../components/site-chrome";
-import { useAdminSession } from "../lib/use-admin-session";
+import { SiteFooter, SiteHeader } from "@/components/site-chrome";
+import { useAdminSession } from "@/src/hooks/use-admin-session";
 
 interface ProfileCard {
   jabatan: string;

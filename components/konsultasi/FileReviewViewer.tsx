@@ -1,6 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import Image from "next/image";
 import { Document, Page, pdfjs } from "react-pdf";
 
@@ -60,12 +65,13 @@ function AnnotationCanvas({
 
     if (dataUrl) {
       const image = new window.Image();
-      image.onload = () => context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      image.onload = () =>
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
       image.src = dataUrl;
     }
   }, [dataUrl, height, width]);
 
-  const getPosition = (event: React.PointerEvent<HTMLCanvasElement>) => {
+  const getPosition = (event: ReactPointerEvent<HTMLCanvasElement>) => {
     const canvas = event.currentTarget;
     const bounds = canvas.getBoundingClientRect();
     return {
@@ -74,7 +80,7 @@ function AnnotationCanvas({
     };
   };
 
-  const startDrawing = (event: React.PointerEvent<HTMLCanvasElement>) => {
+  const startDrawing = (event: ReactPointerEvent<HTMLCanvasElement>) => {
     if (!isDrawing) return;
     event.currentTarget.setPointerCapture(event.pointerId);
     drawingRef.current = true;
@@ -90,7 +96,7 @@ function AnnotationCanvas({
     context.moveTo(position.x, position.y);
   };
 
-  const draw = (event: React.PointerEvent<HTMLCanvasElement>) => {
+  const draw = (event: ReactPointerEvent<HTMLCanvasElement>) => {
     if (!drawingRef.current) return;
     const context = event.currentTarget.getContext("2d");
     if (!context) return;
@@ -142,7 +148,9 @@ export default function FileReviewViewer({
   const [pageRatios, setPageRatios] = useState<Record<number, number>>({});
   const [imageRatio, setImageRatio] = useState(1);
   const [drawMode, setDrawMode] = useState(false);
-  const pageWidth = Math.round(Math.max(280, Math.min(viewportWidth - 32, 760)) * zoom);
+  const pageWidth = Math.round(
+    Math.max(280, Math.min(viewportWidth - 32, 760)) * zoom,
+  );
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -165,29 +173,47 @@ export default function FileReviewViewer({
         <div className="flex items-center gap-1.5">
           <button
             type="button"
-            onClick={() => setZoom((current) => Math.max(0.5, Math.round((current - 0.2) * 10) / 10))}
+            onClick={() =>
+              setZoom((current) =>
+                Math.max(0.5, Math.round((current - 0.2) * 10) / 10),
+              )
+            }
             disabled={zoom <= 0.5}
             aria-label="Perkecil pratinjau"
             className="h-8 w-8 rounded border border-slate-300 text-lg font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40"
           >
             −
           </button>
-          <span className="w-12 text-center text-xs font-semibold text-slate-600">{Math.round(zoom * 100)}%</span>
+          <span className="w-12 text-center text-xs font-semibold text-slate-600">
+            {Math.round(zoom * 100)}%
+          </span>
           <button
             type="button"
-            onClick={() => setZoom((current) => Math.min(2.5, Math.round((current + 0.2) * 10) / 10))}
+            onClick={() =>
+              setZoom((current) =>
+                Math.min(2.5, Math.round((current + 0.2) * 10) / 10),
+              )
+            }
             disabled={zoom >= 2.5}
             aria-label="Perbesar pratinjau"
             className="h-8 w-8 rounded border border-slate-300 text-lg font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40"
           >
             +
           </button>
-          <span className="ml-1 max-w-40 truncate text-[11px] text-slate-500" title={fileName}>{fileName}</span>
+          <span
+            className="ml-1 max-w-40 truncate text-[11px] text-slate-500"
+            title={fileName}
+          >
+            {fileName}
+          </span>
         </div>
 
         {isAdmin && (
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex rounded-lg border border-slate-300 p-0.5" aria-label="Mode pratinjau">
+            <div
+              className="flex rounded-lg border border-slate-300 p-0.5"
+              aria-label="Mode pratinjau"
+            >
               <button
                 type="button"
                 onClick={() => setDrawMode(false)}
@@ -205,23 +231,57 @@ export default function FileReviewViewer({
                 Kuas
               </button>
             </div>
-            <button type="button" onClick={() => onBrushColorChange("#ef4444")} aria-label="Kuas merah" title="Kuas merah" className={`h-6 w-6 rounded-full border-2 bg-red-500 ${brushColor === "#ef4444" ? "border-slate-900" : "border-white"}`} />
-            <button type="button" onClick={() => onBrushColorChange("#2563eb")} aria-label="Kuas biru" title="Kuas biru" className={`h-6 w-6 rounded-full border-2 bg-blue-600 ${brushColor === "#2563eb" ? "border-slate-900" : "border-white"}`} />
-            <label className="flex items-center gap-1.5 text-[10px] text-slate-500" title="Ukuran kuas">
+            <button
+              type="button"
+              onClick={() => onBrushColorChange("#ef4444")}
+              aria-label="Kuas merah"
+              title="Kuas merah"
+              className={`h-6 w-6 rounded-full border-2 bg-red-500 ${brushColor === "#ef4444" ? "border-slate-900" : "border-white"}`}
+            />
+            <button
+              type="button"
+              onClick={() => onBrushColorChange("#2563eb")}
+              aria-label="Kuas biru"
+              title="Kuas biru"
+              className={`h-6 w-6 rounded-full border-2 bg-blue-600 ${brushColor === "#2563eb" ? "border-slate-900" : "border-white"}`}
+            />
+            <label
+              className="flex items-center gap-1.5 text-[10px] text-slate-500"
+              title="Ukuran kuas"
+            >
               <span>Kuas</span>
-              <input type="range" min="2" max="12" value={brushSize} onChange={(event) => onBrushSizeChange(Number(event.target.value))} className="w-14 accent-slate-700" />
+              <input
+                type="range"
+                min="2"
+                max="12"
+                value={brushSize}
+                onChange={(event) =>
+                  onBrushSizeChange(Number(event.target.value))
+                }
+                className="w-14 accent-slate-700"
+              />
             </label>
-            <button type="button" onClick={onClear} className="rounded border border-slate-300 px-2 py-1.5 text-[10px] font-semibold text-slate-600 hover:border-red-300 hover:text-red-600">
+            <button
+              type="button"
+              onClick={onClear}
+              className="rounded border border-slate-300 px-2 py-1.5 text-[10px] font-semibold text-slate-600 hover:border-red-300 hover:text-red-600"
+            >
               Hapus coretan
             </button>
           </div>
         )}
       </div>
 
-      <div ref={viewportRef} className="max-h-[70vh] min-h-[420px] overflow-auto overscroll-contain p-4">
+      <div
+        ref={viewportRef}
+        className="max-h-[70vh] min-h-[420px] overflow-auto overscroll-contain p-4"
+      >
         {isImage ? (
           <div className="flex min-w-max justify-center">
-            <div className="relative shrink-0 bg-white shadow-md" style={{ width: pageWidth, height: pageWidth * imageRatio }}>
+            <div
+              className="relative shrink-0 bg-white shadow-md"
+              style={{ width: pageWidth, height: pageWidth * imageRatio }}
+            >
               <Image
                 src={fileDataUrl}
                 alt={`File kiriman ${fileName}`}
@@ -230,7 +290,8 @@ export default function FileReviewViewer({
                 unoptimized
                 onLoad={(event) => {
                   const image = event.currentTarget;
-                  if (image.naturalWidth) setImageRatio(image.naturalHeight / image.naturalWidth);
+                  if (image.naturalWidth)
+                    setImageRatio(image.naturalHeight / image.naturalWidth);
                 }}
                 className="h-full w-full object-contain"
               />
@@ -250,8 +311,17 @@ export default function FileReviewViewer({
           <Document
             file={fileDataUrl}
             onLoadSuccess={({ numPages: pageCount }) => setNumPages(pageCount)}
-            loading={<p className="py-12 text-center text-xs text-slate-500">Memuat dokumen PDF…</p>}
-            error={<p className="py-12 text-center text-xs text-red-600">PDF tidak dapat dibuka. Gunakan tombol buka file untuk mencoba lagi.</p>}
+            loading={
+              <p className="py-12 text-center text-xs text-slate-500">
+                Memuat dokumen PDF…
+              </p>
+            }
+            error={
+              <p className="py-12 text-center text-xs text-red-600">
+                PDF tidak dapat dibuka. Gunakan tombol buka file untuk mencoba
+                lagi.
+              </p>
+            }
             className="flex min-w-max flex-col items-center gap-5"
           >
             {Array.from({ length: numPages }, (_, index) => {
@@ -260,7 +330,11 @@ export default function FileReviewViewer({
               const pageHeight = pageWidth * ratio;
 
               return (
-                <div key={pageNumber} className="relative shrink-0 bg-white shadow-md" style={{ width: pageWidth, height: pageHeight }}>
+                <div
+                  key={pageNumber}
+                  className="relative shrink-0 bg-white shadow-md"
+                  style={{ width: pageWidth, height: pageHeight }}
+                >
                   <Page
                     pageNumber={pageNumber}
                     width={pageWidth}
@@ -268,10 +342,21 @@ export default function FileReviewViewer({
                     renderTextLayer={false}
                     onLoadSuccess={(page) => {
                       const viewport = page.getViewport({ scale: 1 });
-                      setPageRatios((current) => ({ ...current, [pageNumber]: viewport.height / viewport.width }));
+                      setPageRatios((current) => ({
+                        ...current,
+                        [pageNumber]: viewport.height / viewport.width,
+                      }));
                     }}
-                    loading={<div className="flex h-full items-center justify-center text-xs text-slate-400">Memuat halaman {pageNumber}…</div>}
-                    error={<div className="p-6 text-xs text-red-600">Halaman {pageNumber} gagal dimuat.</div>}
+                    loading={
+                      <div className="flex h-full items-center justify-center text-xs text-slate-400">
+                        Memuat halaman {pageNumber}…
+                      </div>
+                    }
+                    error={
+                      <div className="p-6 text-xs text-red-600">
+                        Halaman {pageNumber} gagal dimuat.
+                      </div>
+                    }
                   />
                   <AnnotationCanvas
                     pageNumber={pageNumber}

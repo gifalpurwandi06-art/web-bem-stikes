@@ -1,8 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getCalendarEventsSnapshot, saveCalendarEvents, type KalenderEvent } from "./calendar-events";
-import { getSupabaseBrowserClient } from "./supabase/client";
+import {
+  getCalendarEventsSnapshot,
+  saveCalendarEvents,
+  type KalenderEvent,
+} from "@/lib/calendar-events";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 interface CalendarEventRow {
   id: string;
@@ -37,7 +41,9 @@ function toRow(event: KalenderEvent): CalendarEventRow {
 
 export function useCalendarEvents() {
   const supabase = getSupabaseBrowserClient();
-  const [events, setEvents] = useState<KalenderEvent[]>(() => getCalendarEventsSnapshot());
+  const [events, setEvents] = useState<KalenderEvent[]>(() =>
+    getCalendarEventsSnapshot(),
+  );
   const [loading, setLoading] = useState(Boolean(supabase));
   const [error, setError] = useState("");
 
@@ -53,7 +59,9 @@ export function useCalendarEvents() {
       if (!active) return;
 
       if (queryError) {
-        setError("Kalender bersama belum tersedia. Pastikan schema Supabase terbaru sudah dijalankan.");
+        setError(
+          "Kalender bersama belum tersedia. Pastikan schema Supabase terbaru sudah dijalankan.",
+        );
       } else {
         setEvents((data || []).map((row) => fromRow(row as CalendarEventRow)));
       }
@@ -61,12 +69,17 @@ export function useCalendarEvents() {
     };
 
     void loadEvents();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [supabase]);
 
   const saveEvent = async (event: KalenderEvent) => {
     if (!supabase) {
-      const nextEvents = [...events.filter((item) => item.id !== event.id), event].sort((first, second) => first.date.localeCompare(second.date));
+      const nextEvents = [
+        ...events.filter((item) => item.id !== event.id),
+        event,
+      ].sort((first, second) => first.date.localeCompare(second.date));
       saveCalendarEvents(nextEvents);
       setEvents(nextEvents);
       return { error: "" };
@@ -77,10 +90,17 @@ export function useCalendarEvents() {
       .upsert(toRow(event), { onConflict: "id" })
       .select("id,event_date,title,category,event_time,description")
       .single();
-    if (saveError) return { error: "Agenda gagal disimpan. Pastikan Anda masuk sebagai admin BEM." };
+    if (saveError)
+      return {
+        error: "Agenda gagal disimpan. Pastikan Anda masuk sebagai admin BEM.",
+      };
 
     const savedEvent = fromRow(data as CalendarEventRow);
-    setEvents((current) => [...current.filter((item) => item.id !== savedEvent.id), savedEvent].sort((first, second) => first.date.localeCompare(second.date)));
+    setEvents((current) =>
+      [...current.filter((item) => item.id !== savedEvent.id), savedEvent].sort(
+        (first, second) => first.date.localeCompare(second.date),
+      ),
+    );
     return { error: "" };
   };
 
@@ -92,11 +112,24 @@ export function useCalendarEvents() {
       return { error: "" };
     }
 
-    const { error: deleteError } = await supabase.from("calendar_events").delete().eq("id", id);
-    if (deleteError) return { error: "Agenda gagal dihapus. Pastikan Anda masuk sebagai admin BEM." };
+    const { error: deleteError } = await supabase
+      .from("calendar_events")
+      .delete()
+      .eq("id", id);
+    if (deleteError)
+      return {
+        error: "Agenda gagal dihapus. Pastikan Anda masuk sebagai admin BEM.",
+      };
     setEvents((current) => current.filter((event) => event.id !== id));
     return { error: "" };
   };
 
-  return { events, loading, error, configured: Boolean(supabase), saveEvent, deleteEvent };
+  return {
+    events,
+    loading,
+    error,
+    configured: Boolean(supabase),
+    saveEvent,
+    deleteEvent,
+  };
 }

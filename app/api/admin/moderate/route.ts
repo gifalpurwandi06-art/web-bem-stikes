@@ -1,5 +1,5 @@
 import { Resend } from "resend";
-import { verifyAdminAuthorization } from "../../../lib/supabase/server";
+import { verifyAdminAuthorization } from "../../../../lib/supabase/server";
 
 type ModerationRequest = {
   resource?: "works" | "aspirations";

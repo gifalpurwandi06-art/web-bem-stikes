@@ -20,6 +20,55 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Project Structure Overview
+
+This project follows the standard Next.js App Router structure, where each folder has a distinct responsibility.
+
+```markdown
+web-bem-stikes/
+├── app/
+│ ├── api/ # Server-side route handlers for API endpoints
+│ ├── dashboard/ # Route-based pages for dashboard features
+│ ├── aspirasi/ # Page and UI for aspirations module
+│ ├── dokumen/ # Page and UI for document module
+│ ├── galeri/ # Page and UI for gallery module
+│ ├── karya/ # Page and UI for works module
+│ ├── kegiatan/ # Page and UI for activity/calendar module
+│ ├── konsultasi/ # Page and UI for consultation module
+│ ├── struktur/ # Page and UI for organizational structure
+│ ├── globals.css # Global styling and shared CSS rules
+│ ├── layout.tsx # Root app layout for all pages
+│ └── page.tsx # Homepage route /
+├── lib/
+│ ├── supabase/ # Supabase client/server configuration and helpers
+│ ├── calendar-events.ts # Calendar related utilities
+│ ├── use-admin-session.ts # Custom hook for admin session logic
+│ └── use-calendar-events.ts # Custom hook for calendar data access
+├── public/ # Static assets such as images and icons
+├── supabase/
+│ └── schema.sql # Database schema and SQL setup for persistence
+├── .env.example # Example environment variables
+├── .gitignore # Git ignore rules
+├── next.config.ts # Next.js configuration
+├── next-env.d.ts # TypeScript Next.js environment declarations
+├── package.json # Project scripts and dependencies
+├── tsconfig.json # TypeScript compiler settings
+├── postcss.config.mjs # PostCSS configuration
+├── eslint.config.mjs # Linting rules
+├── README.md # Project documentation
+└── ...
+```
+
+### Folder responsibilities
+
+- `app/`: main application route structure. In Next.js, this folder is responsible for pages, layouts, and route handlers. It groups the app into functional modules based on URL paths.
+- `app/api/`: handles server-side endpoints and backend-like logic such as moderation actions, data operations, and API responses.
+- `lib/`: stores reusable logic, helper functions, hooks, and service abstractions used across multiple pages/features.
+- `lib/supabase/`: centralizes Supabase connection and configuration, ensuring data access stays separated from UI code.
+- `public/`: stores static files that are served directly by the browser without bundling.
+- `supabase/`: stores database schema and infrastructure definitions for persistence-related setup.
+- Root config files (`package.json`, `next.config.ts`, `tsconfig.json`, etc.): manage the framework, dependencies, TypeScript, linting, and build behavior of the project.
+
 ## Moderation Backend
 
 The works, aspirations, gallery, document library, admin review, and email notification flows use Supabase and Resend.

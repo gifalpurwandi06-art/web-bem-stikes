@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { getSupabaseBrowserClient } from "./supabase/client";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export function useAdminSession() {
   const supabase = getSupabaseBrowserClient();
@@ -36,17 +36,19 @@ export function useAdminSession() {
     };
 
     void restoreSession();
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      queueMicrotask(() => {
-        if (!active) return;
-        if (session) {
-          void verifyAdminSession(session);
-        } else {
-          setIsAdmin(false);
-          setAccessToken("");
-        }
-      });
-    });
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        queueMicrotask(() => {
+          if (!active) return;
+          if (session) {
+            void verifyAdminSession(session);
+          } else {
+            setIsAdmin(false);
+            setAccessToken("");
+          }
+        });
+      },
+    );
 
     return () => {
       active = false;
@@ -56,13 +58,17 @@ export function useAdminSession() {
 
   const signIn = async (email: string, password: string) => {
     if (!supabase) {
-      setError("Supabase belum dikonfigurasi. Tambahkan URL dan anon key pada environment.");
+      setError(
+        "Supabase belum dikonfigurasi. Tambahkan URL dan anon key pada environment.",
+      );
       return false;
     }
 
     setLoading(true);
     setError("");
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error: signInError } = await supabase.auth.signInWithPassword(
+      { email, password },
+    );
     if (signInError || !data.session) {
       setError(signInError?.message || "Login gagal.");
       setLoading(false);
@@ -96,5 +102,15 @@ export function useAdminSession() {
     setAccessToken("");
   };
 
-  return { supabase, configured: Boolean(supabase), isAdmin, accessToken, loading, error, signIn, signOut, setError };
+  return {
+    supabase,
+    configured: Boolean(supabase),
+    isAdmin,
+    accessToken,
+    loading,
+    error,
+    signIn,
+    signOut,
+    setError,
+  };
 }
